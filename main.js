@@ -23,12 +23,6 @@ const types = [{
 		category: "route"
 	},
 	{
-		id: "car",
-		name: "машина",
-		icon: "directions_car",
-		category: "route"
-	},
-	{
 		id: "bike",
 		name: "велосипед, мотоцикл",
 		icon: "directions_bike",
