@@ -535,9 +535,10 @@ const app = new Vue({
 			};
 		},
 		pies() {
-			let arr = [];
+			let arr = [],
+				pi = Math.PI * 100;
 
-			let relativeSize = (this.costs.transport / this.costs.total) * Math.PI,
+			let relativeSize = (this.costs.transport / this.costs.total) * pi,
 				startingPoint = 0;
 
 			arr.push({
@@ -545,8 +546,9 @@ const app = new Vue({
 				offset: 0,
 				stroke: "#0dcaf0",
 			});
+
 			startingPoint += relativeSize;
-			(relativeSize = (this.costs.living / this.costs.total) * Math.PI),
+			(relativeSize = (this.costs.living / this.costs.total) * pi),
 				arr.push({
 					relativeSize: relativeSize,
 					offset: -startingPoint,
@@ -554,7 +556,7 @@ const app = new Vue({
 				});
 
 			startingPoint += relativeSize;
-			(relativeSize = (this.costs.food / this.costs.total) * Math.PI),
+			(relativeSize = (this.costs.food / this.costs.total) * pi),
 				arr.push({
 					relativeSize: relativeSize,
 					offset: -startingPoint,
@@ -562,7 +564,7 @@ const app = new Vue({
 				});
 
 			startingPoint += relativeSize;
-			(relativeSize = (this.costs.other / this.costs.total) * Math.PI),
+			(relativeSize = (this.costs.other / this.costs.total) * pi),
 				arr.push({
 					relativeSize: relativeSize,
 					offset: -startingPoint,
