@@ -1,296 +1,277 @@
 <!DOCTYPE html>
 <html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Travel planer</title>
 
-<head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Travel planer</title>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data-10-year-range.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/ru.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/humanize-duration/3.27.0/humanize-duration.min.js"></script>
 
-	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data-10-year-range.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/ru.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/humanize-duration/3.27.0/humanize-duration.min.js"></script>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="main.css" />
+	</head>
 
+	<body>
+		<div class="container my-3">
+			<div id="app">
+				<ul class="nav nav-tabs my-2 d-print-none">
+					<li class="nav-item">
+						<a class="nav-link" :class="{ active: tab == 'cities' }" href="#" @click="tab = 'cities'"> <i class="icon">place</i> Города </a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" :class="{ active: tab == 'plan' }" href="#" @click="tab = 'plan'"> <i class="icon">route</i> План </a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" :class="{ active: tab == 'costs' }" href="#" @click="tab = 'costs'"> <i class="icon">pie_chart</i> Итоги </a>
+					</li>
+				</ul>
 
-	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css">
-	<link rel="stylesheet" href="main.css">
-</head>
-
-<body>
-	<div class="container my-3">
-		<div id="app">
-			<ul class="nav nav-tabs my-2 d-print-none">
-				<li class="nav-item">
-					<a class="nav-link" :class="{ active: tab == 'cities' }" href="#" @click="tab = 'cities'">
-						<i class="icon">place</i> Города
-					</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" :class="{ active: tab == 'plan' }" href="#" @click="tab = 'plan'">
-						<i class="icon">route</i> План
-					</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" :class="{ active: tab == 'costs' }" href="#" @click="tab = 'costs'">
-						<i class="icon">pie_chart</i> Итоги
-					</a>
-				</li>
-			</ul>
-
-			<div v-if="tab=='cities'">
-				<p class="text-secondary d-print-none my-4">Внесите сюда список всех городов и населённых пунктов, которые хотите (или вынуждены) посетить в ходе поездки. Начните с города отправления. Указывайте в том числе транзитные пункты (пересадки).</p>
-				<div v-for="city of cities" class="my-4">
-
-					<div class="row" v-if="city.edit==true">
-						<div class="col">
-							<input type="text" class="form-control" v-model="city.name" placeholder="город, населенный пункт" ref="cityName" @keydown.enter="saveAll" />
-						</div>
-						<div class="col">
-							<select v-model="city.timezone" class="form-select">
-								<option v-for="zone of timezones" :value="zone.value">
-									{{ zone.name }}
-								</option>
-							</select>
-						</div>
-						<div class="col">
-							<select class="form-select" v-model="city.currency">
-								<option v-for="currency of currencies" :value="currency.id">{{currency.name.full}}</option>
-							</select>
-						</div>
-
-						<div class="col-2 d-flex">
-							<button @click="remCity(city.id)" class="btn btn-danger btn-sm ms-2">
-								<i class="icon">delete</i>
-							</button>
-							<button class="btn btn-success btn-sm ms-2" @click="city.edit = false">
-								<i class="icon">save</i>
-							</button>
-						</div>
-					</div>
-					<div v-else>
-						<button class="btn btn-link btn-sm float-end d-print-none" @click="saveAll(); city.edit = true">
-							<i class="icon">edit</i>
-						</button>
-						<h2>{{city.name}}</h2>
-					</div>
-				</div>
-				<button class="btn btn-primary my-2" @click="saveAll(); addCity()" title="населенный пункт, место пересадки">добавить город</button>
-			</div>
-
-			<div v-if="tab=='plan'">
-
-				<p class="text-secondary d-print-none my-4">Здесь вы можете заполнить весь план вашего путешествия: переезды с указанием стоимости билетов, размещения в отелях, апартаментах, а так же указать места, которые хотите посесить в каждом городе и любые местные траты (транспорт, питание и т.д.).</p>
-				<div v-for="point of points" class="clearfix my-4 full-print">
-					<div class="row">
-
-						<div class="col-2">
-							<h3 v-if="showDate(point)">
-								<span class="d-none d-md-inline">{{moment(point.dateStart).format("D MMMM")}}</span>
-								<span class="d-md-none">{{moment(point.dateStart).format("D.MM")}}</span>
-							</h3>
-						</div>
-
-						<div class="col">
-
-							<div class="edit" v-if="point.edit">
-
-								<div class="row">
-									<div class="col-12 col-md-8 d-flex order-md-2">
-										<input type="text" class="form-control" v-model="point.name" placeholder="наименование" />
-										<button @click="remPoint(point.id)" class="btn btn-danger btn-sm ms-2">
-											<i class="icon">delete</i>
-										</button>
-										<button class="btn btn-success btn-sm ms-2" @click="point.edit = false; saveAll()">
-											<i class="icon">save</i>
-										</button>
-									</div>
-									<div class="col-12 col-md-4 mt-2 mt-md-0">
-										<div class="input-group">
-											<span class="input-group-text">
-												<i class="icon">{{typeById(point.type).icon}}</i>
-											</span>
-											<select class="form-select" v-model="point.type">
-												<option v-for="type of typesByCategory(point.category)" :value="type.id">{{type.name}}</option>
-											</select>
-										</div>
-									</div>
-								</div>
-
-								<div class="row">
-									<div class="col-12 col-md-6 mt-2">
-										<select class="form-select" v-model="point.cityStart" required>
-											<option v-for="city of cities" :value="city.id">
-												{{ city.name }}
-											</option>
-											<option value="" disabled selected hidden v-if="cities.length==0">нет городов для выбора</option>
-											<option value="" disabled selected hidden v-else>выберите город...</option>
-										</select>
-									</div>
-
-									<div class="col-12 col-md-6 mt-2" v-if="point.category=='route'">
-										<select class="form-select" v-model="point.cityEnd" required>
-											<option v-for="city of cities" :value="city.id">
-												{{ city.name }}
-											</option>
-											<option value="" disabled selected hidden v-if="cities.length==0">нет городов для выбора</option>
-											<option value="" disabled selected hidden v-else>выберите город...</option>
-										</select>
-									</div>
-									<div class="col-12 col-md-6 mt-2 d-sm-none d-md-flex" v-else></div>
-
-									<div class="col-12 col-md-6 mt-2">
-										<div class="input-group">
-											<input type="date" class="form-control" v-model.lazy="point.dateStart" />
-											<input type="time" class="form-control" v-model.lazy="point.timeStart" />
-										</div>
-									</div>
-
-									<div class="col-12 col-md-6 mt-2" v-if="point.category!='other'">
-										<div class="input-group">
-											<input type="date" class="form-control" v-model.lazy="point.dateEnd" />
-											<input type="time" class="form-control" v-model.lazy="point.timeEnd" />
-										</div>
-									</div>
-									<div class="col-12 col-md-6 mt-2 d-sm-none d-md-flex" v-else></div>
-
-									<div class="col-12 col-md-6 mt-2">
-										<div class="input-group">
-											<input type="number" class="form-control" v-model.number="point.price" value="0" placeholder="стоимость" />
-											<span class="input-group-text">&times;</span>
-											<input type="number" min="1" step="1" class="form-control" value="1" v-model.number="point.count">
-											<select class="form-select" v-model="point.currency">
-												<option v-for="currency of currencies" :value="currency.id">{{currency.name.short}}</option>
-											</select>
-										</div>
-										<div class="float-end" :class="{'text-danger':point.payed==false, 'text-success':point.payed==true}" v-if="point.price>0">{{getPointPrice(point)}}</div>
-										<label>
-											<input type="checkbox" v-model="point.payed" /> уже оплачено
-										</label>
-									</div>
-
-									<div class="col-12 col-md-6 mt-2">
-										<textarea class="form-control" placeholder="комментарии" v-model="point.comment" title="Адрес, контактные телефоны, режим работы и т.д."></textarea>
-									</div>
-								</div>
-
-							</div>
-							<div v-else class="view clearfix full-print">
-
-								<div :class="{'ms-3':point.category=='other1'}">
-
-
-									<button class="btn btn-link btn-sm float-end d-print-none" @click="saveAll(); point.edit = true">
-										<i class="icon">edit</i>
-									</button>
-									<h3 v-if="point.category!='other'">
-										<span><i class="icon">{{typeById(point.type).icon}}</i></span>
-										<span>{{getPointTitle(point)}}</span>
-									</h3>
-									<h5 v-else>
-										<span><i class="icon">{{typeById(point.type).icon}}</i></span>
-										<span>{{getPointTitle(point)}}</span>
-									</h5>
-									<p class="float-end" :class="{'text-danger':point.payed==false, 'text-success':point.payed==true}" v-if="point.price>0">{{getPointPrice(point)}}</p>
-									<p v-if="point.category=='route'">{{point.name}}</p>
-									<p>{{getPointDates(point)}} <span class="text-secondary ms-4"> {{getPointDuration(point)}}</span></p>
-									<p v-if="point.comment.length" class="fst-italic">{{point.comment}}</p>
-								</div>
-
-							</div>
-
-						</div>
-
-					</div>
-
-					<div class="row text-secondary my-4 full-print" v-for="ending of getEndings(point)">
-						<div class="col-2">
-							<h3 v-if="showDate(ending, true)">
-								<span class="d-none d-md-inline">{{moment(ending.dateEnd).format("D MMMM")}}</span>
-								<span class="d-md-none">{{moment(ending.dateEnd).format("D.MM")}}</span>
-							</h3>
-						</div>
-						<div class="col">
-							<h3>
-								<span><i class="icon">{{typeById(ending.type).icon}}</i></span>
-								<span v-if="ending.category=='route'">прибытие в {{getCityName(ending.cityEnd)}}</span>
-								<span v-if="ending.category=='residence'">выезд из {{ending.name}}</span>
-							</h3>
-							<p>{{moment(ending.dateEnd + " " + ending.timeEnd).format("D MMMM, HH:mm")}}</p>
-							</div>
-					</div>
-
-					</div>
-
-				<div class="d-flex gap-2 my-3 d-print-none justify-content-center">
-					<button class="btn btn-primary" @click="addPoint('', 'route', 'train')" title="переезд, перелёт, трансфер">добавить поездку</button>
-					<button class="btn btn-primary" @click="addPoint('', 'residence', 'hotel')" title="отель, хостел, апартаменты">добавить размещение</button>
-					<button class="btn btn-primary" @click="addPoint('', 'other', 'food')" title="питание, достопримечательности, экскурсии">добавить места и расходы</button>
-				</div>
-				<p class="text-secondary d-print-none my-4">В наименовании удобно указывать номер рейса, терминал, посадочные места, название отеля, компании предоставляющей аренду, номер бронирования и прочее. А в комментариях - адрес, телефон, режим работы и т.д.</p>
-				<p class="text-secondary d-print-none my-4">Когда заполните весь план, можете нажать <kbd>Ctrl</kbd>+<kbd>P</kbd>, распечатать его и взять с собой в поездку.</p>
-
-			</div>
-
-			<div v-if="tab=='costs'">
-				<div class="row my-4">
-					<div class="col">
-						<h3>Стоимость поездки</h3>
-						<table class="table">
-							<tr>
-								<td>Уже оплачено:</td>
-								<td><span class="text-success">{{money.format(costs.spent)}}</span></td>
-							</tr>
-							<tr>
-								<td>Ещё оплатить:</td>
-								<td><span class="text-danger">{{money.format(costs.needPay)}}</span></td>
-							</tr>
-							<tr>
-								<td>Всего расходов:</td>
-								<td><b>{{money.format(costs.total)}}</b></td>
-							</tr>
-						</table>
-					</div>
-					<div class="col">
-						<h3 class="mb-3">На что уходят деньги</h3>
-						<div class="row align-items-center">
+				<div v-if="tab=='cities'">
+					<p class="text-secondary d-print-none my-4">Внесите сюда список всех городов и населённых пунктов, которые хотите (или вынуждены) посетить в ходе поездки. Начните с города отправления. Указывайте в том числе транзитные пункты (пересадки).</p>
+					<div v-for="city of cities" class="my-4">
+						<div class="row" v-if="city.edit==true">
 							<div class="col">
-								<svg class="pie" viewBox="0 0 150 150" style="transform: rotate(-90deg)">
-									<circle v-for="item of pies" :style="{strokeDasharray: `${item.relativeSize} 314.159`, strokeDashoffset: item.offset, stroke: item.stroke}" r="50" cx="50%" cy="50%" style="fill: none; stroke-width: 50" />
-								</svg>
+								<input type="text" class="form-control" v-model="city.name" placeholder="город, населенный пункт" ref="cityName" @keydown.enter="saveAll" />
 							</div>
 							<div class="col">
-								<table class="table table-borderless">
-									<tr>
-										<td><i style="color:#0dcaf0">&#9632;</i> Транспорт:</td>
-										<td>{{money.format(costs.transport)}}</td>
-									</tr>
-									<tr>
-										<td><i style="color:#6f42c1">&#9632;</i> Проживание:</td>
-										<td>{{money.format(costs.living)}}</td>
-									</tr>
-									<tr>
-										<td><i style="color:#d63384">&#9632;</i> Еда:</td>
-										<td>{{money.format(costs.food)}}</td>
-									</tr>
-									<tr>
-										<td><i style="color:#20c997">&#9632;</i> Остальное:</td>
-										<td>{{money.format(costs.other)}}</td>
-									</tr>
-								</table>
+								<select v-model="city.timezone" class="form-select">
+									<option v-for="zone of timezones" :value="zone.value">{{ zone.name }}</option>
+								</select>
+							</div>
+							<div class="col">
+								<select class="form-select" v-model="city.currency">
+									<option v-for="currency of currencies" :value="currency.id">{{currency.name.full}}</option>
+								</select>
+							</div>
+
+							<div class="col-2 d-flex">
+								<button @click="remCity(city.id)" class="btn btn-danger btn-sm ms-2">
+									<i class="icon">delete</i>
+								</button>
+								<button class="btn btn-success btn-sm ms-2" @click="city.edit = false">
+									<i class="icon">save</i>
+								</button>
+							</div>
+						</div>
+						<div v-else>
+							<button class="btn btn-link btn-sm float-end d-print-none" @click="saveAll(); city.edit = true">
+								<i class="icon">edit</i>
+							</button>
+							<h2>{{city.name}}</h2>
+						</div>
+					</div>
+					<button class="btn btn-primary my-2" @click="saveAll(); addCity()" title="населенный пункт, место пересадки">добавить город</button>
+				</div>
+
+				<div v-if="tab=='plan'">
+					<p class="text-secondary d-print-none my-4">Здесь вы можете заполнить весь план вашего путешествия: переезды с указанием стоимости билетов, размещения в отелях, апартаментах, а так же указать места, которые хотите посесить в каждом городе и любые местные траты (транспорт, питание и т.д.).</p>
+					<div v-for="point of points" class="clearfix my-4 full-print">
+						<div class="row">
+							<div class="col-2">
+								<h3 v-if="showDate(point)">
+									<span class="d-none d-md-inline">{{moment(point.dateStart).format("D MMMM")}}</span>
+									<span class="d-md-none">{{moment(point.dateStart).format("D.MM")}}</span>
+								</h3>
+							</div>
+
+							<div class="col">
+								<div class="edit" v-if="point.edit">
+									<div class="row">
+										<div class="col-12 col-md-8 d-flex order-md-2">
+											<input type="text" class="form-control" v-model="point.name" placeholder="наименование" />
+											<button @click="remPoint(point.id)" class="btn btn-danger btn-sm ms-2">
+												<i class="icon">delete</i>
+											</button>
+											<button class="btn btn-success btn-sm ms-2" @click="point.edit = false; saveAll()">
+												<i class="icon">save</i>
+											</button>
+										</div>
+										<div class="col-12 col-md-4 mt-2 mt-md-0">
+											<div class="input-group">
+												<span class="input-group-text">
+													<i class="icon">{{typeById(point.type).icon}}</i>
+												</span>
+												<select class="form-select" v-model="point.type">
+													<option v-for="type of typesByCategory(point.category)" :value="type.id">{{type.name}}</option>
+												</select>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-12 col-md-6 mt-2">
+											<select class="form-select" v-model="point.cityStart" required>
+												<option v-for="city of cities" :value="city.id">{{ city.name }}</option>
+												<option value="" disabled selected hidden v-if="cities.length==0">нет городов для выбора</option>
+												<option value="" disabled selected hidden v-else>выберите город...</option>
+											</select>
+										</div>
+
+										<div class="col-12 col-md-6 mt-2" v-if="point.category=='route'">
+											<select class="form-select" v-model="point.cityEnd" required>
+												<option v-for="city of cities" :value="city.id">{{ city.name }}</option>
+												<option value="" disabled selected hidden v-if="cities.length==0">нет городов для выбора</option>
+												<option value="" disabled selected hidden v-else>выберите город...</option>
+											</select>
+										</div>
+										<div class="col-12 col-md-6 mt-2 d-sm-none d-md-flex" v-else></div>
+
+										<div class="col-12 col-md-6 mt-2">
+											<div class="input-group">
+												<input type="date" class="form-control" v-model.lazy="point.dateStart" />
+												<input type="time" class="form-control" v-model.lazy="point.timeStart" />
+											</div>
+										</div>
+
+										<div class="col-12 col-md-6 mt-2" v-if="point.category!='other'">
+											<div class="input-group">
+												<input type="date" class="form-control" v-model.lazy="point.dateEnd" />
+												<input type="time" class="form-control" v-model.lazy="point.timeEnd" />
+											</div>
+										</div>
+										<div class="col-12 col-md-6 mt-2 d-sm-none d-md-flex" v-else></div>
+
+										<div class="col-12 col-md-6 mt-2">
+											<div class="input-group">
+												<input type="number" class="form-control" v-model.number="point.price" value="0" placeholder="стоимость" />
+												<span class="input-group-text">&times;</span>
+												<input type="number" min="1" step="1" class="form-control" value="1" v-model.number="point.count" />
+												<select class="form-select" v-model="point.currency">
+													<option v-for="currency of getFilteredCurrencies(point.cityStart, point.cityEnd)" :value="currency.id">{{currency.name.short}}</option>
+												</select>
+											</div>
+											<div class="float-end" :class="{'text-danger':point.payed==false, 'text-success':point.payed==true}" v-if="point.price>0">{{getPointPrice(point)}}</div>
+											<label> <input type="checkbox" v-model="point.payed" /> уже оплачено </label>
+										</div>
+
+										<div class="col-12 col-md-6 mt-2">
+											<textarea class="form-control" placeholder="комментарии" v-model="point.comment" title="Адрес, контактные телефоны, режим работы и т.д."></textarea>
+										</div>
+									</div>
+								</div>
+								<div v-else class="view clearfix full-print">
+									<div :class="{'ms-3':point.category=='other1'}">
+										<button class="btn btn-link btn-sm float-end d-print-none" @click="saveAll(); point.edit = true">
+											<i class="icon">edit</i>
+										</button>
+										<h3 v-if="point.category!='other'">
+											<span><i class="icon">{{typeById(point.type).icon}}</i></span>
+											<span>{{getPointTitle(point)}}</span>
+										</h3>
+										<h5 v-else>
+											<span><i class="icon">{{typeById(point.type).icon}}</i></span>
+											<span>{{getPointTitle(point)}}</span>
+										</h5>
+										<p class="float-end" :class="{'text-danger':point.payed==false, 'text-success':point.payed==true}" v-if="point.price>0">{{getPointPrice(point)}}</p>
+										<p v-if="point.category=='route'">{{point.name}}</p>
+										<p>
+											{{getPointDates(point)}}
+											<span class="text-secondary ms-4"> {{getPointDuration(point)}}</span>
+										</p>
+										<p v-if="point.comment.length" class="fst-italic">{{point.comment}}</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row text-secondary my-4 full-print" v-for="ending of getEndings(point)">
+							<div class="col-2">
+								<h3 v-if="showDate(ending, true)">
+									<span class="d-none d-md-inline">{{moment(ending.dateEnd).format("D MMMM")}}</span>
+									<span class="d-md-none">{{moment(ending.dateEnd).format("D.MM")}}</span>
+								</h3>
+							</div>
+							<div class="col">
+								<h3>
+									<span><i class="icon">{{typeById(ending.type).icon}}</i></span>
+									<span v-if="ending.category=='route'">прибытие в {{getCityName(ending.cityEnd)}}</span>
+									<span v-if="ending.category=='residence'">выезд из {{ending.name}}</span>
+								</h3>
+								<p>{{moment(ending.dateEnd + " " + ending.timeEnd).format("DMMMM,HH:mm")}}</p>
 							</div>
 						</div>
 					</div>
+
+					<div class="d-flex gap-2 my-3 d-print-none justify-content-center">
+						<button class="btn btn-primary" @click="addPoint('', 'route', 'train')" title="переезд, перелёт, трансфер">добавить поездку</button>
+						<button class="btn btn-primary" @click="addPoint('', 'residence', 'hotel')" title="отель, хостел, апартаменты">добавить размещение</button>
+						<button class="btn btn-primary" @click="addPoint('', 'other', 'food')" title="питание, достопримечательности, экскурсии">добавить места и расходы</button>
+					</div>
+					<p class="text-secondary d-print-none my-4">В наименовании удобно указывать номер рейса, терминал, посадочные места, название отеля, компании предоставляющей аренду, номер бронирования и прочее. А в комментариях - адрес, телефон, режим работы и т.д.</p>
+					<p class="text-secondary d-print-none my-4">
+						Когда заполните весь план, можете нажать
+						<kbd>Ctrl</kbd>+<kbd>P</kbd>, распечатать его и взять с собой в поездку.
+					</p>
 				</div>
-				<button class="btn btn-danger my-2" @click="removeAll()">удалить всё</button>
-				<p class="my-3 text-secondary d-print-none">Курсы валют любезно предоставлены сайтом: <a href="https://www.cbr-xml-daily.ru/">API для курсов ЦБ РФ</a></p>
+
+				<div v-if="tab=='costs'">
+					<div class="row my-4">
+						<div class="col">
+							<h3>Стоимость поездки</h3>
+							<table class="table">
+								<tr>
+									<td>Уже оплачено:</td>
+									<td>
+										<span class="text-success">{{money.format(costs.spent)}}</span>
+									</td>
+								</tr>
+								<tr>
+									<td>Ещё оплатить:</td>
+									<td>
+										<span class="text-danger">{{money.format(costs.needPay)}}</span>
+									</td>
+								</tr>
+								<tr>
+									<td>Всего расходов:</td>
+									<td><b>{{money.format(costs.total)}}</b></td>
+								</tr>
+							</table>
+						</div>
+						<div class="col">
+							<h3 class="mb-3">На что уходят деньги</h3>
+							<div class="row align-items-center">
+								<div class="col">
+									<svg class="pie" viewBox="0 0 150 150" style="transform: rotate(-90deg)">
+										<circle v-for="item of pies" :style="{strokeDasharray: `${item.relativeSize} 314.159`, strokeDashoffset: item.offset, stroke: item.stroke}" r="50" cx="50%" cy="50%" style="fill: none; stroke-width: 50" />
+									</svg>
+								</div>
+								<div class="col">
+									<table class="table table-borderless">
+										<tr>
+											<td><i style="color: #0dcaf0">&#9632;</i> Транспорт:</td>
+											<td>{{money.format(costs.transport)}}</td>
+										</tr>
+										<tr>
+											<td><i style="color: #6f42c1">&#9632;</i> Проживание:</td>
+											<td>{{money.format(costs.living)}}</td>
+										</tr>
+										<tr>
+											<td><i style="color: #d63384">&#9632;</i> Еда:</td>
+											<td>{{money.format(costs.food)}}</td>
+										</tr>
+										<tr>
+											<td><i style="color: #20c997">&#9632;</i> Остальное:</td>
+											<td>{{money.format(costs.other)}}</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+					<button class="btn btn-danger my-2" @click="removeAll()">удалить всё</button>
+					<p class="my-3 text-secondary d-print-none">
+						Курсы валют любезно предоставлены сайтом:
+						<a href="https://www.cbr-xml-daily.ru/">API для курсов ЦБ РФ</a>
+					</p>
+				</div>
 			</div>
 		</div>
-
-	</div>
-	<script src="main.js"></script>
-</body>
-
+		<script src="main.js"></script>
+	</body>
 </html>
