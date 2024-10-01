@@ -482,7 +482,6 @@ const app = new Vue({
 				codes.push(this.getCityCurrency(cityEnd));
 			}
 
-			console.log(cityStart, cityEnd);
 			return this.currencies.filter((z) => codes.includes(z.id));
 		},
 	},

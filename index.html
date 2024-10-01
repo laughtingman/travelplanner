@@ -83,9 +83,9 @@
 
 							<div class="col">
 								<div class="edit" v-if="point.edit">
-									<div class="row">
+									<div class="row gx-2">
 										<div class="col-12 col-md-8 d-flex order-md-2">
-											<input type="text" class="form-control" v-model="point.name" placeholder="наименование" />
+											<input type="text" class="form-control" v-model="point.name" placeholder="наименование" title="Название, номер рейса, терминал и пр." />
 											<button @click="remPoint(point.id)" class="btn btn-danger btn-sm ms-2">
 												<i class="icon">delete</i>
 											</button>
@@ -105,8 +105,8 @@
 										</div>
 									</div>
 
-									<div class="row">
-										<div class="col-12 col-md-6 mt-2">
+									<div class="row mt-2 gx-2">
+										<div class="col-12" :class="{'col-md-6':point.category=='route'}">
 											<select class="form-select" v-model="point.cityStart" required>
 												<option v-for="city of cities" :value="city.id">{{ city.name }}</option>
 												<option value="" disabled selected hidden v-if="cities.length==0">нет городов для выбора</option>
@@ -114,41 +114,45 @@
 											</select>
 										</div>
 
-										<div class="col-12 col-md-6 mt-2" v-if="point.category=='route'">
+										<div class="col-12 col-md-6 mt-2 mt-md-0" v-if="point.category=='route'">
 											<select class="form-select" v-model="point.cityEnd" required>
 												<option v-for="city of cities" :value="city.id">{{ city.name }}</option>
 												<option value="" disabled selected hidden v-if="cities.length==0">нет городов для выбора</option>
 												<option value="" disabled selected hidden v-else>выберите город...</option>
 											</select>
 										</div>
-										<div class="col-12 col-md-6 mt-2 d-sm-none d-md-flex" v-else></div>
+									</div>
 
-										<div class="col-12 col-md-6 mt-2">
+									<div class="row mt-2 gx-2">
+										<div class="col-12" :class="{'col-md-6':point.category!='other'}">
 											<div class="input-group">
 												<input type="date" class="form-control" v-model.lazy="point.dateStart" />
-												<input type="time" class="form-control" v-model.lazy="point.timeStart" />
+												<input type="time" class="form-control" v-model.lazy="point.timeStart" title="Всегда указывайте местное время" />
 											</div>
 										</div>
 
-										<div class="col-12 col-md-6 mt-2" v-if="point.category!='other'">
+										<div class="col-12 col-md-6 mt-2 mt-md-0" v-if="point.category!='other'">
 											<div class="input-group">
 												<input type="date" class="form-control" v-model.lazy="point.dateEnd" />
-												<input type="time" class="form-control" v-model.lazy="point.timeEnd" />
+												<input type="time" class="form-control" v-model.lazy="point.timeEnd" title="Всегда указывайте местное время" />
 											</div>
 										</div>
-										<div class="col-12 col-md-6 mt-2 d-sm-none d-md-flex" v-else></div>
-
+									</div>
+									<div class="row gx-2">
 										<div class="col-12 col-md-6 mt-2">
 											<div class="input-group">
-												<input type="number" class="form-control" v-model.number="point.price" value="0" placeholder="стоимость" />
+												<input type="number" class="form-control" v-model.number="point.price" value="0" placeholder="Стоимость" />
 												<span class="input-group-text">&times;</span>
-												<input type="number" min="1" step="1" class="form-control" value="1" v-model.number="point.count" />
-												<select class="form-select" v-model="point.currency">
+												<input type="number" min="1" step="1" class="form-control" value="1" v-model.number="point.count" title="Число мест, людей, билетов, дней и пр." />
+												<select class="form-select" v-model="point.currency" title="валюта">
 													<option v-for="currency of getFilteredCurrencies(point.cityStart, point.cityEnd)" :value="currency.id">{{currency.name.short}}</option>
 												</select>
 											</div>
 											<div class="float-end" :class="{'text-danger':point.payed==false, 'text-success':point.payed==true}" v-if="point.price>0">{{getPointPrice(point)}}</div>
-											<label> <input type="checkbox" v-model="point.payed" /> уже оплачено </label>
+											<label class="form-check">
+												<input class="form-check-input" type="checkbox" v-model="point.payed" />
+												<div class="form-check-label">уже оплачено</div>
+											</label>
 										</div>
 
 										<div class="col-12 col-md-6 mt-2">
