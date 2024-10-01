@@ -212,7 +212,7 @@ const app = new Vue({
 		addCity() {
 			let city = {
 				id: new Date().valueOf(),
-				name: "Город без имени",
+				name: "Место без названия",
 				timezone: moment.tz.guess(),
 				edit: true,
 				currency: "RUB",
@@ -262,6 +262,7 @@ const app = new Vue({
 				currency: "RUB",
 				comment: "",
 				edit: true,
+				ending: false,
 			};
 
 			this.points.push(point);
@@ -393,11 +394,13 @@ const app = new Vue({
 		},
 
 		getCityName(cityId) {
-			return this.cities.find((z) => z.id == cityId).name;
+			let city = this.cities.find((z) => z.id == cityId);
+			return city ? city.name : "место без названия";
 		},
 
 		getCityCurrency(cityId) {
-			return this.cities.find((z) => z.id == cityId).currency;
+			let city = this.cities.find((z) => z.id == cityId);
+			return city ? city.currency : "RUB";
 		},
 
 		getTypeName(typeId) {
@@ -409,18 +412,13 @@ const app = new Vue({
 			return this.cities.find((z) => z.id == cityId).timezone;
 		},
 
-		showDate(point, end = false) {
+		showDate(point) {
 			if (point.dateStart == "") return false;
-			let first = null;
-			if (!end) {
-				first = this.points.find((z) => {
-					return z.dateStart != "" && moment(z.dateStart).isSame(moment(point.dateStart), "day");
-				});
-			} else {
-				first = this.points.find((z) => {
-					return z.dateEnd != "" && moment(z.dateStart).isSame(moment(point.dateEnd), "day");
-				});
-			}
+
+			let first = this.sortedPoints.find((z) => {
+				return z.dateStart != "" && moment(z.dateStart).isSame(moment(point.dateStart), "day");
+			});
+
 			return first != null ? first.id == point.id : true;
 		},
 		getEndings(point) {
@@ -484,7 +482,6 @@ const app = new Vue({
 				codes.push(this.getCityCurrency(cityEnd));
 			}
 
-			console.log(cityStart, cityEnd);
 			return this.currencies.filter((z) => codes.includes(z.id));
 		},
 	},
@@ -544,7 +541,7 @@ const app = new Vue({
 			arr.push({
 				relativeSize: relativeSize,
 				offset: 0,
-				stroke: "#0dcaf0",
+				stroke: "var(--bs-info)",
 			});
 
 			startingPoint += relativeSize;
@@ -552,7 +549,7 @@ const app = new Vue({
 				arr.push({
 					relativeSize: relativeSize,
 					offset: -startingPoint,
-					stroke: "#6f42c1",
+					stroke: "var(--bs-warning)",
 				});
 
 			startingPoint += relativeSize;
@@ -560,7 +557,7 @@ const app = new Vue({
 				arr.push({
 					relativeSize: relativeSize,
 					offset: -startingPoint,
-					stroke: "#d63384",
+					stroke: "var(--bs-danger)",
 				});
 
 			startingPoint += relativeSize;
@@ -568,10 +565,47 @@ const app = new Vue({
 				arr.push({
 					relativeSize: relativeSize,
 					offset: -startingPoint,
-					stroke: "#20c997",
+					stroke: "var(--bs-success)",
 				});
 
 			return arr;
+		},
+		sortedPoints() {
+			let points = [...this.points];
+			let endPoints = [];
+
+			for (let point of points) {
+				if (point.dateEnd != "") {
+					endPoints.push({
+						ending: true,
+						dateStart: point.dateEnd,
+						timeStart: point.timeEnd,
+						dateEnd: point.dateEnd,
+						timeEnd: point.timeEnd,
+						type: point.type,
+						category: point.category,
+						name: point.name,
+						cityStart: point.cityStart,
+						cityEnd: point.cityEnd,
+						edit: false,
+					});
+				}
+			}
+
+			points.push(...endPoints);
+
+			return points.sort((a, b) => {
+				let d1 = a.dateStart + " " + a.timeStart,
+					d2 = b.dateStart + " " + b.timeStart,
+					tz1 = this.getTimezoneByCity(a.cityStart),
+					tz2 = this.getTimezoneByCity(b.cityStart);
+
+				if (a.dateStart == "" && b.dateStart != "") return 1;
+				if (a.dateStart != "" && b.dateStart == "") return -1;
+				if (a.dateStart == "" && b.dateStart == "") return 0;
+
+				return moment.tz(d1.trim(), tz1) - moment.tz(d2.trim(), tz2);
+			});
 		},
 	},
 });
