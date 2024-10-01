@@ -541,7 +541,7 @@ const app = new Vue({
 			arr.push({
 				relativeSize: relativeSize,
 				offset: 0,
-				stroke: "#0dcaf0",
+				stroke: "var(--bs-info)",
 			});
 
 			startingPoint += relativeSize;
@@ -549,7 +549,7 @@ const app = new Vue({
 				arr.push({
 					relativeSize: relativeSize,
 					offset: -startingPoint,
-					stroke: "#6f42c1",
+					stroke: "var(--bs-warning)",
 				});
 
 			startingPoint += relativeSize;
@@ -557,7 +557,7 @@ const app = new Vue({
 				arr.push({
 					relativeSize: relativeSize,
 					offset: -startingPoint,
-					stroke: "#d63384",
+					stroke: "var(--bs-danger)",
 				});
 
 			startingPoint += relativeSize;
@@ -565,7 +565,7 @@ const app = new Vue({
 				arr.push({
 					relativeSize: relativeSize,
 					offset: -startingPoint,
-					stroke: "#20c997",
+					stroke: "var(--bs-success)",
 				});
 
 			return arr;

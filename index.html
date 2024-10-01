@@ -25,59 +25,81 @@
 						<a class="nav-link" :class="{ active: tab == 'cities' }" href="#" @click="tab = 'cities'"> <i class="icon">place</i> Города </a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" :class="{ active: tab == 'plan' }" href="#" @click="tab = 'plan'"> <i class="icon">route</i> План </a>
+						<a class="nav-link" :class="{ active: tab == 'plan' }" href="#" @click="tab = 'plan'"> <i class="icon">route</i> План поездки </a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" :class="{ active: tab == 'costs' }" href="#" @click="tab = 'costs'"> <i class="icon">pie_chart</i> Итоги </a>
+						<a class="nav-link" :class="{ active: tab == 'costs' }" href="#" @click="tab = 'costs'"> <i class="icon">pie_chart</i> Бюджет </a>
 					</li>
 				</ul>
 
 				<div v-if="tab=='cities'">
 					<p class="text-secondary d-print-none my-4">Внесите сюда список всех городов и населённых пунктов, которые хотите (или вынуждены) посетить в ходе поездки. Начните с города отправления. Указывайте в том числе транзитные пункты (пересадки).</p>
-					<div v-for="city of cities" class="my-4">
-						<div class="row" v-if="city.edit==true">
-							<div class="col">
-								<input type="text" class="form-control" v-model="city.name" placeholder="город, населенный пункт" ref="cityName" @keydown.enter="saveAll" />
-							</div>
-							<div class="col">
-								<select v-model="city.timezone" class="form-select">
-									<option v-for="zone of timezones" :value="zone.value">{{ zone.name }}</option>
-								</select>
-							</div>
-							<div class="col">
-								<select class="form-select" v-model="city.currency">
-									<option v-for="currency of currencies" :value="currency.id">{{currency.name.full}}</option>
-								</select>
-							</div>
 
-							<div class="col-2 d-flex">
-								<button @click="remCity(city.id)" class="btn btn-danger btn-sm ms-2">
-									<i class="icon">delete</i>
-								</button>
-								<button class="btn btn-success btn-sm ms-2" @click="city.edit = false">
-									<i class="icon">save</i>
-								</button>
-							</div>
-						</div>
-						<div v-else>
-							<button class="btn btn-link btn-sm float-end d-print-none" @click="saveAll(); city.edit = true">
-								<i class="icon">edit</i>
-							</button>
-							<h2>{{city.name}}</h2>
-						</div>
-					</div>
+					<table class="table">
+						<tr>
+							<th>Город</th>
+							<th>Часовой пояс</th>
+							<th>Валюта</th>
+							<th></th>
+						</tr>
+						<tr v-for="city of cities">
+							<td class="align-middle">
+								<div v-if="city.edit">
+									<input type="text" class="form-control" v-model="city.name" placeholder="город, населенный пункт" ref="cityName" @keydown.enter="saveAll" />
+								</div>
+								<div v-else>
+									<b>{{getCityName(city.id)}}</b>
+								</div>
+							</td>
+							<td class="align-middle">
+								<div v-if="city.edit">
+									<select v-model="city.timezone" class="form-select">
+										<option v-for="zone of timezones" :value="zone.value">{{ zone.name }}</option>
+									</select>
+								</div>
+								<div v-else>
+									<span>{{city.timezone}}</span>
+								</div>
+							</td>
+							<td class="align-middle">
+								<div v-if="city.edit">
+									<select class="form-select" v-model="city.currency">
+										<option v-for="currency of currencies" :value="currency.id">{{currency.name.full}}</option>
+									</select>
+								</div>
+								<div v-else>
+									<span>{{city.currency}}</span>
+								</div>
+							</td>
+							<td class="align-middle">
+								<div v-if="city.edit" class="d-flex gap-1">
+									<button key="remove" @click="remCity(city.id)" class="btn btn-danger btn-sm ms-2">
+										<i class="icon">delete</i>
+									</button>
+									<button key="save" class="btn btn-success btn-sm ms-2" @click="city.edit = false">
+										<i class="icon">save</i>
+									</button>
+								</div>
+								<div v-else class="d-flex justify-content-end">
+									<button key="edit" class="btn btn-link btn-sm d-print-none" @click="saveAll(); city.edit = true">
+										<i class="icon">edit</i>
+									</button>
+								</div>
+							</td>
+						</tr>
+					</table>
+
 					<button class="btn btn-primary my-2" @click="saveAll(); addCity()" title="населенный пункт, место пересадки">добавить город</button>
 				</div>
 
 				<div v-if="tab=='plan'">
 					<p class="text-secondary d-print-none my-4">Здесь вы можете заполнить весь план вашего путешествия: переезды с указанием стоимости билетов, размещения в отелях, апартаментах, а так же указать места, которые хотите посесить в каждом городе и любые местные траты (транспорт, питание и т.д.).</p>
 
-					<div v-for="point of sortedPoints" class="clearfix my-4 full-print">
-						<div class="row">
-							<div class="col-2">
+					<div class="points">
+						<div v-for="point of sortedPoints" class="clearfix my-4 full-print row">
+							<div class="col-2 timeline" :class="{'ending':point.ending}">
 								<h3 v-if="showDate(point)">
-									<span class="d-none d-lg-inline">{{moment(point.dateStart).format("D MMMM")}}</span>
-									<span class="d-lg-none"><nobr>{{moment(point.dateStart).format("D MMM").replace(".","")}}</nobr></span>
+									<span>{{moment(point.dateStart).format("D MMM").replace(".","")}}</span>
 								</h3>
 							</div>
 
@@ -241,19 +263,19 @@
 								<div class="col">
 									<table class="table table-borderless">
 										<tr>
-											<td><i style="color: #0dcaf0">&#9632;</i> Транспорт:</td>
+											<td><i class="text-info">&#9632;</i> Транспорт:</td>
 											<td>{{money.format(costs.transport)}}</td>
 										</tr>
 										<tr>
-											<td><i style="color: #6f42c1">&#9632;</i> Проживание:</td>
+											<td><i class="text-warning">&#9632;</i> Проживание:</td>
 											<td>{{money.format(costs.living)}}</td>
 										</tr>
 										<tr>
-											<td><i style="color: #d63384">&#9632;</i> Еда:</td>
+											<td><i class="text-danger">&#9632;</i> Еда:</td>
 											<td>{{money.format(costs.food)}}</td>
 										</tr>
 										<tr>
-											<td><i style="color: #20c997">&#9632;</i> Остальное:</td>
+											<td><i class="text-success">&#9632;</i> Остальное:</td>
 											<td>{{money.format(costs.other)}}</td>
 										</tr>
 									</table>
