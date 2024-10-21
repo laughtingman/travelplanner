@@ -23,6 +23,8 @@ a.nav-link {
 }
 
 .row .timeline {
+	width: 10rem;
+	min-width: 10rem;
 	position: relative;
 	padding-right: 4rem;
 	text-align: center;
@@ -39,21 +41,29 @@ a.nav-link {
 	top: 1rem;
 }
 
+.row.row.started .timeline::before {
+	background: var(--bs-blue);
+}
+
+.row.started .timeline::after {
+	background: linear-gradient(to bottom, var(--bs-blue) 0%, #eee 70%);
+}
+
+.row.completed .timeline::after {
+	background: var(--bs-blue) !important;
+}
+
 .row .timeline:before {
 	content: "";
 	display: block;
 	border-radius: 50%;
-	background-color: var(--bs-blue);
+	background-color: #eee;
 	width: 1rem;
 	height: 1rem;
 	position: absolute;
 	right: 1.5rem;
 	top: 0.75rem;
 	z-index: 2;
-}
-
-.timeline.ending:before {
-	background-color: #ddd;
 }
 
 .row:last-child .timeline:after {
