@@ -227,7 +227,7 @@ const app = new Vue({
 				edit: true,
 				currency: lastRow.currency,
 				country: lastRow.country,
-				iso2: lastRow.code,
+				iso2: lastRow.iso2,
 				district: "",
 			};
 			this.cities.push(city);

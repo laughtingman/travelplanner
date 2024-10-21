@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Travel planer</title>
+		<title>Travel Planer</title>
 
 		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
@@ -16,6 +16,8 @@
 		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css" />
 		<link rel="stylesheet" href="main.css" />
+
+		<link rel="icon" href="./favicon.svg" type="image/svg+xml" />
 	</head>
 
 	<body>
@@ -23,13 +25,16 @@
 			<div id="app">
 				<ul class="nav nav-tabs my-2 d-print-none">
 					<li class="nav-item">
-						<a class="nav-link" :class="{ active: tab == 'cities' }" href="#" @click="tab = 'cities'"> <i class="icon">place</i> Города </a>
+						<a class="nav-link" :class="{ active: tab == 'cities' }" href="#" @click="tab = 'cities'"> <i class="icon">place</i><span class="d-none d-md-inline">Города</span> </a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" :class="{ active: tab == 'plan' }" href="#" @click="tab = 'plan'"> <i class="icon">route</i> План поездки </a>
+						<a class="nav-link" :class="{ active: tab == 'plan' }" href="#" @click="tab = 'plan'"> <i class="icon">route</i><span class="d-none d-md-inline">План поездки</span></a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" :class="{ active: tab == 'costs' }" href="#" @click="tab = 'costs'"> <i class="icon">pie_chart</i> Бюджет </a>
+						<a class="nav-link" :class="{ active: tab == 'costs' }" href="#" @click="tab = 'costs'"> <i class="icon">pie_chart</i><span class="d-none d-md-inline">Бюджет</span></a>
+					</li>
+					<li class="nav-item ms-auto">
+						<a class="nav-link" :class="{ active: tab == 'about' }" href="#" @click="tab = 'about'"> <i class="icon">info</i><span class="d-none d-md-inline">О проекте</span></a>
 					</li>
 				</ul>
 
@@ -236,10 +241,10 @@
 					</div>
 
 					<div class="d-flex gap-2 my-3 d-print-none justify-content-center align-items-center">
-						Добавить
-						<button class="btn btn-primary" @click="addPoint('', 'route', 'train')" title="переезд, перелёт, трансфер">поездку</button>
-						<button class="btn btn-primary" @click="addPoint('', 'residence', 'hotel')" title="отель, хостел, апартаменты">размещение</button>
-						<button class="btn btn-primary" @click="addPoint('', 'other', 'food')" title="питание, достопримечательности, экскурсии">места и другие расходы</button>
+						Добавить<br />
+						<button class="btn btn-primary" @click="addPoint('', 'route', 'train')" title="переезд, перелёт, трансфер"><i class="icon">flight</i><span class="d-none d-md-inline ms-2">перелёт / поездку</span></button>
+						<button class="btn btn-primary" @click="addPoint('', 'residence', 'hotel')" title="отель, хостел, апартаменты"><i class="icon">hotel</i><span class="d-none d-md-inline ms-2">размещение</span></button>
+						<button class="btn btn-primary" @click="addPoint('', 'other', 'food')" title="питание, достопримечательности, экскурсии"><i class="icon">restaurant</i><span class="d-none d-md-inline ms-2">еда и другое</span></button>
 					</div>
 					<p class="text-secondary d-print-none my-4">В наименовании удобно указывать номер рейса, терминал, посадочные места, название отеля, компании предоставляющей аренду, номер бронирования и прочее. А в комментариях - адрес, телефон, режим работы и т.д.</p>
 					<p class="text-secondary d-print-none my-4">
@@ -303,10 +308,20 @@
 						</div>
 					</div>
 					<button class="btn btn-danger my-2" @click="removeAll()">удалить всё</button>
-					<p class="my-3 text-secondary d-print-none">
-						Курсы валют любезно предоставлены сайтом:
-						<a href="https://www.cbr-xml-daily.ru/">API для курсов ЦБ РФ</a>
-					</p>
+				</div>
+
+				<div v-if="tab=='about'" class="d-print-none">
+					<h4 class="mt-4 mb-3">О проекте</h4>
+					<p>Данный планировщик создан для личного использования с ценлью облегчить себе планирование путешествия и посчитать предстоящие расходны на него.</p>
+					<h4 class="mt-5 mb-3">Используемые ресурсы и API</h4>
+					<ul>
+						<li>Дизайн: <a href="https://getbootstrap.com/">https://getbootstrap.com/</a></li>
+						<li>Селекты: <a href="https://github.com/KazanExpress/vue-simple-suggest">https://github.com/KazanExpress/vue-simple-suggest</a></li>
+						<li>Курсы валют: <a href="https://www.cbr-xml-daily.ru/">https://www.cbr-xml-daily.ru/</a></li>
+						<li>Флаги стран мира: <a href="https://flagsapi.com/">https://flagsapi.com/</a></li>
+						<li>Иконки: <a href="https://fonts.google.com/icons">https://fonts.google.com/icons</a></li>
+					</ul>
+					<p>Списки стран, городов и соответствющих им часовых поясов собраны из нескольких общедоступных датасетов. Достоверность и актуальнось информации в них не проверялась и не гарантируется.</p>
 				</div>
 			</div>
 		</div>
