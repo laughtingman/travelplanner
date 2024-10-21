@@ -120,7 +120,7 @@
 					<p class="text-secondary d-print-none my-4">Здесь вы можете заполнить весь план вашего путешествия: переезды с указанием стоимости билетов, размещения в отелях, апартаментах, а так же указать места, которые хотите посесить в каждом городе и любые местные траты (транспорт, питание и т.д.).</p>
 
 					<div class="points">
-						<div v-for="point of sortedPoints" class="clearfix my-4 full-print row">
+						<div v-for="(point,p) of sortedPoints" class="clearfix my-4 full-print row" :class="isCompleted(point,p)">
 							<div class="col-2 timeline" :class="{'ending':point.ending}">
 								<h3 v-if="showDate(point)">
 									<span>{{moment(point.dateStart).format("D MMM").replace(".","")}}</span>

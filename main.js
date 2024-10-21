@@ -543,6 +543,26 @@ const app = new Vue({
 
 			return this.currencies.filter((z) => codes.includes(z.id));
 		},
+
+		isCompleted(point, p) {
+			let classes = [];
+			tz = point.cityEnd != null ? this.getTimezoneByCity(point.cityEnd) : this.getTimezoneByCity(point.cityStart);
+			let start = this.getStartDate(point);
+			if (start != null && moment().tz(tz).diff(start, "hours") >= 0) {
+				classes.push("started");
+			}
+
+			if (this.sortedPoints.length > p + 1) {
+				let nextPoint = this.sortedPoints[p + 1];
+				let nextStart = this.getStartDate(nextPoint);
+				let nextTz = this.getTimezoneByCity(nextPoint.cityStart);
+				if (nextStart != null && moment().tz(nextTz).diff(nextStart, "hours") >= 0) {
+					classes.push("completed");
+				}
+			}
+
+			return classes;
+		},
 	},
 	computed: {
 		costs() {
