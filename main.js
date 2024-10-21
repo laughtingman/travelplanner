@@ -228,6 +228,7 @@ const app = new Vue({
 				currency: lastRow.currency,
 				country: lastRow.country,
 				iso2: lastRow.code,
+				district: "",
 			};
 			this.cities.push(city);
 		},
@@ -277,6 +278,7 @@ const app = new Vue({
 			if (selected.tz != "") {
 				city.timezone = selected.tz;
 			}
+			city.district = selected.district;
 		},
 
 		remCity(cityId) {

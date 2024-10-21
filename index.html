@@ -67,6 +67,7 @@
 								</div>
 								<div v-else>
 									<b>{{getCityName(city.id)}}</b>
+									<div v-if="city.district"><small>{{city.district}}</small></div>
 								</div>
 							</td>
 							<td class="align-middle">
@@ -148,7 +149,7 @@
 									<div class="row mt-2 gx-2">
 										<div class="col-12" :class="{'col-md-6':point.category=='route'}">
 											<select class="form-select" v-model="point.cityStart" required>
-												<option v-for="city of cities" :value="city.id">{{ city.name }}</option>
+												<option v-for="city of cities" :value="city.id">{{ city.name }}<span v-if="city.district">, {{city.district}}</span></option>
 												<option value="" disabled selected hidden v-if="cities.length==0">нет городов для выбора</option>
 												<option value="" disabled selected hidden v-else>выберите город...</option>
 											</select>
@@ -156,7 +157,7 @@
 
 										<div class="col-12 col-md-6 mt-2 mt-md-0" v-if="point.category=='route'">
 											<select class="form-select" v-model="point.cityEnd" required>
-												<option v-for="city of cities" :value="city.id">{{ city.name }}</option>
+												<option v-for="city of cities" :value="city.id">{{ city.name }}<span v-if="city.district">, {{city.district}}</span></option>
 												<option value="" disabled selected hidden v-if="cities.length==0">нет городов для выбора</option>
 												<option value="" disabled selected hidden v-else>выберите город...</option>
 											</select>
