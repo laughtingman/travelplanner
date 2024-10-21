@@ -11,6 +11,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data-10-year-range.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/ru.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/humanize-duration/3.27.0/humanize-duration.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue-simple-suggest@1.11.2/dist/umd.min.js"></script>
 
 		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/css/bootstrap.min.css" />
@@ -37,6 +38,7 @@
 
 					<table class="table">
 						<tr>
+							<th>Страна</th>
 							<th>Город</th>
 							<th>Часовой пояс</th>
 							<th>Валюта</th>
@@ -45,7 +47,23 @@
 						<tr v-for="city of cities">
 							<td class="align-middle">
 								<div v-if="city.edit">
-									<input type="text" class="form-control" v-model="city.name" placeholder="город, населенный пункт" ref="cityName" @keydown.enter="saveAll" />
+									<vue-simple-suggest v-model="city.country" display-attribute="name_ru" value-attribute="iso3" :filter-by-query="true" :filter="filterCountry" :list="countries" :min-length="1" @select="selectCountry($event,city)" :styles="suggestStyles" :max-suggestions="7">
+										<div slot="suggestion-item" slot-scope="{ suggestion, query }">
+											<div class="d-flex">{{ suggestion.name_ru }}</div>
+										</div>
+									</vue-simple-suggest>
+								</div>
+								<div v-else class="d-flex align-items-center"><img v-if="city.iso2" :src="'https://flagsapi.com/'+ city.iso2 + '/shiny/32.png'" class="me-2" />{{city.country}}</div>
+							</td>
+
+							<td class="align-middle">
+								<div v-if="city.edit">
+									<vue-simple-suggest v-model="city.name" ref="cityName" display-attribute="name_ru" value-attribute="id" :filter-by-query="true" :filter="filterCity" :list="getCities(city.iso2)" :min-length="1" @select="selectCity($event,city)" @keydown.enter="saveAll" :styles="suggestStyles" :max-suggestions="7">
+										<div slot="suggestion-item" slot-scope="{ suggestion, query }">
+											<div class="d-flex">{{ suggestion.name_ru }}</div>
+											<div v-if="suggestion.district" class="opacity-50"><small>{{ suggestion.district }}</small></div>
+										</div>
+									</vue-simple-suggest>
 								</div>
 								<div v-else>
 									<b>{{getCityName(city.id)}}</b>

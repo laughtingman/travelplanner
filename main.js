@@ -184,6 +184,15 @@ const app = new Vue({
 			],
 		};
 	},
+
+	beforeMount() {
+		fetch("./data/countries.json", { method: "GET" })
+			.then((response) => response.json())
+			.then((data) => {
+				this.countries = data;
+			});
+	},
+
 	mounted() {
 		moment.locale("ru");
 		moment.relativeTimeThreshold("h", 24);
@@ -210,18 +219,66 @@ const app = new Vue({
 	updated() {},
 	methods: {
 		addCity() {
+			let lastRow = this.cities.length > 0 ? this.cities[this.cities.length - 1] : { country: "Россия", iso2: "RU", currency: "RUB", tz: "Europe/Moscow" };
 			let city = {
 				id: new Date().valueOf(),
-				name: "Место без названия",
-				timezone: moment.tz.guess(),
+				name: "Без названия",
+				timezone: lastRow.tz,
 				edit: true,
-				currency: "RUB",
+				currency: lastRow.currency,
+				country: lastRow.country,
+				iso2: lastRow.code,
 			};
 			this.cities.push(city);
-			this.$nextTick(() => {
-				this.$refs.cityName[0].select();
-			});
 		},
+
+		selectCountry(country, city) {
+			city.country = country.name_ru;
+			city.iso2 = country.iso2;
+			if (this.currencies.find((z) => z.id == country.currency)) city.currency = country.currency;
+			if (country.tz != "") city.timezone = country.tz;
+		},
+
+		filterCountry(item, query) {
+			if (item.name.toLowerCase().startsWith(query.toLowerCase())) {
+				return true;
+			}
+
+			if (item.name_ru.toLowerCase().startsWith(query.toLowerCase())) {
+				return true;
+			}
+
+			return false;
+		},
+
+		getCities(code) {
+			return (inputValue) => {
+				return fetch(`./data/${code}.json`, { method: "GET" })
+					.then((response) => response.json())
+					.then((json) => {
+						return json;
+					});
+			};
+		},
+
+		filterCity(item, query) {
+			if (item.name.toLowerCase().startsWith(query.toLowerCase())) {
+				return true;
+			}
+
+			if (item.name_ru.toLowerCase().startsWith(query.toLowerCase())) {
+				return true;
+			}
+
+			return false;
+		},
+
+		selectCity(selected, city) {
+			if (selected.tz != "") {
+				city.timezone = selected.tz;
+			}
+		},
+
 		remCity(cityId) {
 			if (confirm("Точно удалить город?")) {
 				this.cities = this.cities.filter((z) => z.id != cityId);
@@ -606,6 +663,13 @@ const app = new Vue({
 
 				return moment.tz(d1.trim(), tz1) - moment.tz(d2.trim(), tz2);
 			});
+		},
+		suggestStyles() {
+			return {
+				defaultInput: "form-control",
+				suggestions: "dropdown-menu show",
+				suggestItem: "dropdown-item",
+			};
 		},
 	},
 });
