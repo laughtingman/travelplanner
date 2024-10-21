@@ -80,3 +80,9 @@ select:invalid {
 		page-break-inside: avoid;
 	}
 }
+
+.suggest-item.selected,
+.suggest-item.hover {
+	background-color: var(--bs-blue);
+	color: white;
+}
