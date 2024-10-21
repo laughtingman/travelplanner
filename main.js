@@ -216,7 +216,12 @@ const app = new Vue({
 			this.points = JSON.parse(localStorage["travel_points"]);
 		}
 	},
-	updated() {},
+	updated() {
+		let currentRow = document.querySelector(".row.edit");
+		if (currentRow != undefined) {
+			currentRow.scrollIntoView({ block: "center", behavior: "smooth" });
+		}
+	},
 	methods: {
 		addCity() {
 			let lastRow = this.cities.length > 0 ? this.cities[this.cities.length - 1] : { country: "Россия", iso2: "RU", currency: "RUB", tz: "Europe/Moscow" };
@@ -561,7 +566,17 @@ const app = new Vue({
 				}
 			}
 
+			if (point.edit) {
+				classes.push("edit");
+			}
+
 			return classes;
+		},
+
+		changeStart(point) {
+			if (point.dateEnd != null && point.dateEnd < point.dateStart) {
+				point.dateEnd = point.dateStart;
+			}
 		},
 	},
 	computed: {
